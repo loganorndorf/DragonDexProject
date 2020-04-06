@@ -130,13 +130,15 @@ class PopupGrid(QWidget):
     def __init__(self, name, attri, baseStar, unitType):
         super().__init__()
 
+        # input recieved from initial PopupGrid call
         self.simple = name
         self.cAttr = attri
         self.baseStar = baseStar
         self.unitType = unitType
 
+        # info to remember
         self.currentStar = baseStar
-        self.currentEvol = 1
+        self.currentEvol = 0
 
         self.popup_grid()
 
@@ -145,10 +147,7 @@ class PopupGrid(QWidget):
         self.setLayout(yeup)
 
     def popup_grid(self):
-        # evolution images
-        self.imageBox = QGroupBox("Dragon Evolutions")
-
-        #  dragon stats box setup
+        ###  dragon stats box setup  ###
         self.statsBox = QGroupBox("Dragon Stats")
         self.statsGrid = QGridLayout()
         self.statsBox.setLayout(self.statsGrid)
@@ -193,7 +192,7 @@ class PopupGrid(QWidget):
             self.attr = PATH + "\\" + "card_cha_attr_light.png"
 
         attrImg = QPixmap(self.attr)
-        attrImg.scaled(QSize(20, 20), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        attrImg.scaled(QSize(24, 24), Qt.KeepAspectRatio, Qt.SmoothTransformation)
         AImage.setPixmap(attrImg)
         AImage.setAlignment(Qt.AlignCenter)
 
@@ -210,34 +209,52 @@ class PopupGrid(QWidget):
             self.star = PATH + "\\" + "card_star_yellow_0105.png"
             self.rari = PATH + "\\" + "gem_legend.png"
 
-        starImg = QPixmap(self.star)
-        starImg.scaled(QSize(20, 20), Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.BSImage.setPixmap(starImg)
+        # star Image
+        self.starImg = QPixmap(self.star)
+        self.starImg.scaled(QSize(20, 20), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.BSImage.setPixmap(self.starImg)
         self.BSImage.setAlignment(Qt.AlignCenter)
+        self.plus = QPushButton(QIcon(PATH+"\\"+"plus.png"), "", self)
+        self.plus.setIconSize(QSize(30, 30))
+        self.plus.setMaximumSize(QSize(35, 35))
+        # self.plus.setStyleSheet("margin: auto")
+        self.plus.clicked.connect(self.add)
+
+        self.minus = QPushButton(QIcon(PATH+"\\"+"minus.png"), "", self)
+        self.minus.setIconSize(QSize(30, 30))
+        self.minus.setMaximumSize(QSize(35, 35))
+        # self.minus.setStyleSheet("margin: auto")
+        self.minus.clicked.connect(self.subtract)
+
+        # rarity Image
         rarityImg = QPixmap(self.rari)
         rarityImg.scaled(QSize(20, 20), Qt.KeepAspectRatio, Qt.SmoothTransformation)
         RImage.setPixmap(rarityImg)
         RImage.setAlignment(Qt.AlignCenter)
 
+        self.numberBox = QGroupBox("")
+        self.numberGrid = QGridLayout()
+        self.numberBox.setLayout(self.numberGrid)
+
         self.statsGrid.addWidget(UTImage, 0, 1)
         self.statsGrid.addWidget(AImage, 0, 0)
         self.statsGrid.addWidget(RImage, 0, 2)
-        self.statsGrid.addWidget(self.BSImage, 1, 0, 1, 3)
+        self.statsGrid.addWidget(self.BSImage, 1, 1)
+        self.statsGrid.addWidget(self.minus, 1, 0)
+        self.statsGrid.addWidget(self.plus, 1,2)
 
-        # dragon skill box setup
+        self.statsGrid.addWidget(self.numberBox, 2, 0, 2, 3)
+        ##############################
+
+        ### dragon skill box setup ###
         self.skillBox = QGroupBox("Dragon Skills")
 
-        # pop up window grid layout
-        self.container = QGridLayout()
-        self.G = QGroupBox("")
-        self.G.setLayout(self.container)
+        self.skillGrid = QGridLayout()
+        self.skillBox.setLayout(self.skillGrid)
+        ##############################
 
-        self.container.addWidget(self.imageBox, 0, 0)
-        self.container.addWidget(self.statsBox, 0, 1, 2, 1)
-        self.container.addWidget(self.skillBox, 1, 0)
-
-
-
+        ### dragon evolution box setup ###
+        self.imageBox = QGroupBox("Dragon Evolutions")
         self.imageGrid = QGridLayout()
         self.imageBox.setLayout(self.imageGrid)
 
@@ -249,13 +266,142 @@ class PopupGrid(QWidget):
 
             j = i-1
             self.imageGrid.addWidget(label, 0, j)
+        ##############################
 
+        # pop up window grid layout
+        self.container = QGridLayout()
+        self.G = QGroupBox("")
+        self.G.setLayout(self.container)
 
-        self.skillGrid = QGridLayout()
-        self.skillBox.setLayout(self.skillGrid)
+        self.container.addWidget(self.imageBox, 0, 0)
+        self.container.addWidget(self.statsBox, 0, 1, 2, 1)
+        self.container.addWidget(self.skillBox, 1, 0)
 
     def evo_selection_action(self):
         parent = self.sender()
+        pos = self.imageGrid.indexOf(parent)
+
+        # starting with brute force option for checking what star image to put up
+        if(self.currentEvol != 0 and pos == 0):
+            self.update = None
+            if(self.currentStar == 2):
+                self.update = QPixmap(PATH + "\\" + "card_star_yellow_0102.png")
+            elif(self.currentStar == 3):
+                self.update = QPixmap(PATH + "\\" + "card_star_yellow_0103.png")
+            elif(self.currentStar == 4):
+                self.update = QPixmap(PATH + "\\" + "card_star_yellow_0104.png")
+            elif(self.currentStar == 5):
+                self.update = QPixmap(PATH + "\\" + "card_star_yellow_0105.png")
+            elif(self.currentStar == 6):
+                self.update = QPixmap(PATH + "\\" + "card_star_yellow_0106.png")
+
+            self.update.scaled(QSize(20,20), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.BSImage.setPixmap(self.update)
+
+            self.currentEvol = 0
+        elif(self.currentEvol != 1 and pos == 1):
+            self.update = None
+            if (self.currentStar == 2):
+                self.update = QPixmap(PATH + "\\" + "card_star_purple_0102.png")
+            elif (self.currentStar == 3):
+                self.update = QPixmap(PATH + "\\" + "card_star_purple_0103.png")
+            elif (self.currentStar == 4):
+                self.update = QPixmap(PATH + "\\" + "card_star_purple_0104.png")
+            elif (self.currentStar == 5):
+                self.update = QPixmap(PATH + "\\" + "card_star_purple_0105.png")
+            elif (self.currentStar == 6):
+                self.update = QPixmap(PATH + "\\" + "card_star_purple_0106.png")
+
+            self.update.scaled(QSize(20, 20), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.BSImage.setPixmap(self.update)
+
+            self.currentEvol = 1
+        elif(self.currentEvol != 2 and pos == 2):
+
+            if(self.baseStar == self.currentStar):
+                self.currentStar += 1
+
+            self.update = None
+            if (self.currentStar == 3):
+                self.update = QPixmap(PATH + "\\" + "card_star_red_0103.png")
+            elif (self.currentStar == 4):
+                self.update = QPixmap(PATH + "\\" + "card_star_red_0104.png")
+            elif (self.currentStar == 5):
+                self.update = QPixmap(PATH + "\\" + "card_star_red_0105.png")
+            elif (self.currentStar == 6):
+                self.update = QPixmap(PATH + "\\" + "card_star_red_0106.png")
+
+            self.update.scaled(QSize(20, 20), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.BSImage.setPixmap(self.update)
+            self.currentEvol = 2
+
+    def subtract(self):
+        self.word = None
+        if(self.currentEvol == 2):
+            # make sure by decreasing the star you are still above the
+            temp = self.baseStar + 1
+            if(self.currentStar - 1 >= temp):
+                self.currentStar -= 1
+
+            self.word = "red"
+        elif(self.currentEvol == 1):
+            if(self.currentStar - 1 >= self.baseStar):
+                self.currentStar -= 1
+            self.word = "purple"
+
+        elif(self.currentEvol == 0):
+            if(self.currentStar - 1 >= self.baseStar):
+                self.currentStar -= 1
+            self.word = "yellow"
+
+
+        self.newGuy = None
+        if (self.currentStar == 2):
+            self.newGuy = QPixmap(PATH + "\\" + "card_star_"+self.word+"_0102.png")
+        if (self.currentStar == 3):
+            self.newGuy = QPixmap(PATH + "\\" + "card_star_"+self.word+"_0103.png")
+        elif (self.currentStar == 4):
+            self.newGuy = QPixmap(PATH + "\\" + "card_star_"+self.word+"_0104.png")
+        elif (self.currentStar == 5):
+            self.newGuy = QPixmap(PATH + "\\" + "card_star_"+self.word+"_0105.png")
+        elif (self.currentStar == 6):
+            self.newGuy = QPixmap(PATH + "\\" + "card_star_"+self.word+"_0106.png")
+
+        self.newGuy.scaled(QSize(20, 20), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.BSImage.setPixmap(self.newGuy)
+
+    def add(self):
+        self.word = None
+        temp = 6
+        if (self.currentEvol == 2):
+            # make sure by decreasing the star you are still above the
+            temp = 6
+            if (self.currentStar + 1 <= temp):
+                self.currentStar += 1
+
+            self.word = "red"
+        elif (self.currentEvol == 1):
+            if (self.currentStar + 1 <= temp):
+                self.currentStar += 1
+            self.word = "purple"
+
+        elif (self.currentEvol == 0):
+            if (self.currentStar + 1 <= temp):
+                self.currentStar += 1
+            self.word = "yellow"
+
+        self.newGuy = None
+        if (self.currentStar == 3):
+            self.newGuy = QPixmap(PATH + "\\" + "card_star_" + self.word + "_0103.png")
+        elif (self.currentStar == 4):
+            self.newGuy = QPixmap(PATH + "\\" + "card_star_" + self.word + "_0104.png")
+        elif (self.currentStar == 5):
+            self.newGuy = QPixmap(PATH + "\\" + "card_star_" + self.word + "_0105.png")
+        elif (self.currentStar == 6):
+            self.newGuy = QPixmap(PATH + "\\" + "card_star_" + self.word + "_0106.png")
+
+        self.newGuy.scaled(QSize(20, 20), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.BSImage.setPixmap(self.newGuy)
         return
 
 
