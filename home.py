@@ -95,7 +95,7 @@ class character_popUp(QMainWindow):
             host="localhost",
             database="DVMdb",
             user="postgres",
-            password="$avageXL7"
+            password=""
         )
 
         cur = con.cursor()
